@@ -74,7 +74,7 @@ a:visited {
   margin: inherit;
   position: inherit;
   top:    inherit;
-  bottom: inherit;
+  bottom: 300px;
   left:   inherit;
   right:  inherit;
   width: 100%;
@@ -84,6 +84,77 @@ a:visited {
 */
   background: rgba(255,255,255,0.15);
 }
+#shapes {
+  margin: inherit;
+  position: inherit;
+  bottom:    inherit;
+  top: 300px;
+  left:   inherit;
+  right:  inherit;
+  width: 100%;
+  z-index: 6;
+/*
+   background: transparent;
+*/
+  background: rgba(255,255,255,0.15);
+}
+#shapes > div{
+text-align: center;
+vertical-align: bottom;
+line-height: 80px; 
+font-size: 0.7em;
+font-weight: bold;
+}
+#shapes > div:hover{
+  box-shadow: inset 0 0 0 4px pink;
+  cursor: pointer;
+}
+#cube {
+    width: 78px;
+    height: 75px;
+    background: url('../imgs/shapes.jpg') -115px -202px;
+}
+#sphere {
+    width: 78px;
+    height: 75px;
+    background: url('../imgs/shapes.jpg') -310px -10px;
+}
+#cylinder {
+    width: 78px;
+    height: 75px;
+    background: url('../imgs/shapes.jpg') -210px -202px;
+}
+#torus {
+    width: 78px;
+    height: 75px;
+    background: url('../imgs/shapes.jpg') -210px -105px;
+}
+
+#polyhedron {
+    width: 78px;
+    height: 75px;
+    background: url('../imgs/shapes.jpg') -310px -105px;
+}
+.horizontal{
+    float: left;
+}
+
+.horizontal  *{
+  padding: 0 0 0 0;
+  margin: 0 0 0 0;
+    display: inline-block;
+}
+
+.vertical {
+    float: left;
+    width: 100%;
+}
+
+.vertical  > *{
+    display :block;
+    width: 100%;
+}
+
 
 #viewerContext {
    margin: 0px;             /* not inherited */

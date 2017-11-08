@@ -10,6 +10,8 @@ const AlertUserOfUncaughtExceptions = require('./errorDispatcher')
 
 const { version } = require('../jscad/version')
 const Processor = require('../jscad/processor')
+const { shapes } = require('./shapes')
+const { baseCode } = require('./shapes')
 
 const me = document.location.toString().match(/^file:/) ? 'web-offline' : 'web-online'
 const browser = detectBrowser()
@@ -54,6 +56,25 @@ function init () {
 
   gProcessor = new Processor(document.getElementById('viewerContext'))
   gEditor = setUpEditor(undefined, gProcessor)
+
+  //Drag/drop
+  
+  document.getElementById('viewerContext').ondragover = function(evt) {
+    evt.preventDefault();
+  };
+  document.getElementById('viewerContext').ondrop = function(ev) {
+    ev.preventDefault();
+    var shape = ev.dataTransfer.getData("shape");
+    var code = ev.dataTransfer.getData("code");
+    var currentCode = gEditor.getValue();
+    if (currentCode.indexOf("main") >= 0)
+      currentCode = currentCode.replace(baseCode[1], ",\n" + code + baseCode[1])
+    else
+      currentCode = baseCode[0] + code + baseCode[1];
+    gEditor.setValue(currentCode, -1);
+    gEditor.runExec(gEditor);
+  };
+
   // FIXME: temporary hack
 
 // major DIVs expected
@@ -100,8 +121,8 @@ function init () {
 
     let examples = document.getElementById('examples');
     if (examples) {
-      createExamples(me)
-      loadInitialExample(me, {memFs, gProcessor, gEditor, proxyUrl})
+      //createExamples(me)
+      //loadInitialExample(me, {memFs, gProcessor, gEditor, proxyUrl})
 
       // -- Examples
       examplesTitle.addEventListener('click', function (e) {

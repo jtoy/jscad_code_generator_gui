@@ -2,6 +2,14 @@ const { CSG, CAG } = require('@jscad/csg')
 
 // handled format descriptions
 const formats = {
+  js: {
+    displayName: 'js',
+    description: 'JavaScript Source',
+    extension: 'js',
+    mimetype: 'application/javascript',
+    convertCSG: true,
+    convertCAG: true
+  },
   stl: {
     displayName: 'STL (Binary)',
     description: 'STereoLithography, Binary',
@@ -52,14 +60,6 @@ const formats = {
     displayName: 'JSCAD',
     description: 'OpenJSCAD.org Source',
     extension: 'jscad',
-    mimetype: 'application/javascript',
-    convertCSG: true,
-    convertCAG: true
-  },
-  js: {
-    displayName: 'js',
-    description: 'JavaScript Source',
-    extension: 'js',
     mimetype: 'application/javascript',
     convertCSG: true,
     convertCAG: true

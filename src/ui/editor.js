@@ -17,14 +17,52 @@ const ace = require('brace')
 require('brace/mode/javascript')
 require('brace/mode/scad')
 require('brace/theme/chrome')
+const { shapes } = require('./shapes')
+const { baseCode } = require('./shapes')
 
 const openscadOpenJscadParser = require('@jscad/openscad-openjscad-translator')
 
+ var globalRun; 
 // See http://ace.ajax.org/#nav=howto
 function setUpEditor (divname, gProcessor) {
   var gEditor = null
   if (divname === undefined) { divname = 'editor' }
   if (document.getElementById(divname) === null) return
+
+  //Setup shape
+  for (var shape in shapes) {
+    if (document.getElementById(shape)) {
+      document.getElementById(shape).addEventListener("click", function(event) {
+        var currentCode = gEditor.getValue();
+        if (currentCode.indexOf("main") >= 0)
+          currentCode = currentCode.replace(baseCode[1], ",\n" + shapes[event.target.id] + baseCode[1])
+        else
+          currentCode = baseCode[0] + shapes[event.target.id] + baseCode[1];
+        gEditor.setValue(currentCode, -1);
+        runExec(gEditor);
+      })
+
+      //drag
+      document.getElementById(shape).ondragstart = function(event){
+        event.dataTransfer.setData("shape", event.target.id);
+        event.dataTransfer.setData("code", shapes[event.target.id]);
+      }
+    }
+  }
+
+function runExec(editor) {
+    var src = editor.getValue()
+    if (src.match(/^\/\/\!OpenSCAD/i)) {
+      editor.getSession().setMode('ace/mode/scad')
+      // FIXME test for the global function first
+      src = openscadOpenJscadParser.parse(src)
+    } else {
+      editor.getSession().setMode('ace/mode/javascript')
+    }
+    if (gProcessor !== null) {
+      gProcessor.setJsCad(src)
+    }
+  }
 
   gEditor = ace.edit(divname)
   gEditor.$blockScrolling = Infinity
@@ -59,19 +97,7 @@ function setUpEditor (divname, gProcessor) {
   // gEditor.setTheme("ace/theme/vibrant_ink")
   // gEditor.setTheme("ace/theme/xcode")
 
-  function runExec(editor) {
-    var src = editor.getValue()
-    if (src.match(/^\/\/\!OpenSCAD/i)) {
-      editor.getSession().setMode('ace/mode/scad')
-      // FIXME test for the global function first
-      src = openscadOpenJscadParser.parse(src)
-    } else {
-      editor.getSession().setMode('ace/mode/javascript')
-    }
-    if (gProcessor !== null) {
-      gProcessor.setJsCad(src)
-    }
-  }
+  
   // enable special keystrokes
   gEditor.commands.addCommand({
     name: 'setJSCAD',
@@ -131,6 +157,7 @@ function setUpEditor (divname, gProcessor) {
     }
   })
 
+  gEditor.runExec = runExec;
   return gEditor
 }
 
