@@ -128,10 +128,15 @@ Viewer.prototype = {
     canvas.width = this.containerEl.clientWidth * devicePixelRatio
     canvas.height = this.containerEl.clientHeight * devicePixelRatio
   },
-  setCsg: function (csg) {
-    if (0 && csg.length) {                            // preparing multiple CSG's (not union-ed), not yet working
+  setCsg: function(csg) {
+    this.meshes = [];
+    if (csg.length) { // preparing multiple CSG's (not union-ed), not yet working
       for (var i = 0; i < csg.length; i++) {
-        this.meshes.concat(this.csgToMeshes(csg[i]))
+        var n = this.csgToMeshes(csg[i]);
+        if (n.length)
+          this.meshes = this.meshes.concat(n)
+        else
+          this.meshes.push(n)
       }
     } else {
       this.meshes = this.csgToMeshes(csg)

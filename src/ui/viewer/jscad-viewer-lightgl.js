@@ -401,7 +401,7 @@ LightGLEngine.prototype = {
   csgToMeshes: function (initial_csg) {
     var csg = initial_csg.canonicalized()
     var mesh = new GL.Mesh({ normals: true, colors: true })
-    var meshes = [ mesh ]
+    var meshes = [];//[ mesh ] //??stupid
     var vertexTag2Index = {}
     var vertices = []
     var colors = []
@@ -473,6 +473,7 @@ LightGLEngine.prototype = {
     mesh.colors = colors
     mesh.computeWireframe()
     mesh.computeNormals()
+
 
     if (mesh.vertices.length) {
       meshes.push(mesh)

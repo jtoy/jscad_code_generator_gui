@@ -1,5 +1,6 @@
 // == OpenJSCAD.org, Copyright (c) 2013-2016, Licensed under MIT License
 const { setUpEditor } = require('./editor')
+const { pick } = require('./editor')
 const { setupDragDrop } = require('./dragDrop/ui-drag-drop') // toggleAutoReload
 
 const { detectBrowser } = require('./detectBrowser')
@@ -56,24 +57,40 @@ function init () {
 
   gProcessor = new Processor(document.getElementById('viewerContext'))
   gEditor = setUpEditor(undefined, gProcessor)
+  gProcessor.editor = gEditor;
+  var pickActive = false;
+  var viewDom = document.getElementById('viewerContext');
+  viewDom.onmousedown = function(event) {
+    if (event.which == 3) {
+      var result = pick(gProcessor, event.clientX, event.clientY);
+      if (result >= 0) {
 
-  //Drag/drop
+        //Test
+        //document.getElementsByName("size"+result)[0].value = 20;
+        gEditor.runExec(gEditor);
+        var params = document.getElementsByClassName("parameterstable")[0];
+        document.getElementById("parametersdiv").style.display = "inline-block";
+        var inputs = params.querySelectorAll("input");
+        //select mesh params by id
+        inputs.forEach(function(p) {
+          if (parseInt(p.name.replace(/^\D+/g, '')) === result) {
+            //p.style.display = "block"
+          } else {
+            params.deleteRow(p.parentNode.parentNode.rowIndex);
+          }
+        })
+        //gProcessor.rebuildSolid();
+      }
+    }
+  }
+  viewDom.onkeydown=function(event) {
+    pickActive = true;
+  }
+  viewDom.onkeyup= function(event) {
+    pickActive = false;
+  }
+
   
-  document.getElementById('viewerContext').ondragover = function(evt) {
-    evt.preventDefault();
-  };
-  document.getElementById('viewerContext').ondrop = function(ev) {
-    ev.preventDefault();
-    var shape = ev.dataTransfer.getData("shape");
-    var code = ev.dataTransfer.getData("code");
-    var currentCode = gEditor.getValue();
-    if (currentCode.indexOf("main") >= 0)
-      currentCode = currentCode.replace(baseCode[1], ",\n" + code + baseCode[1])
-    else
-      currentCode = baseCode[0] + code + baseCode[1];
-    gEditor.setValue(currentCode, -1);
-    gEditor.runExec(gEditor);
-  };
 
   // FIXME: temporary hack
 

@@ -19,6 +19,8 @@ require('brace/mode/scad')
 require('brace/theme/chrome')
 const { shapes } = require('./shapes')
 const { baseCode } = require('./shapes')
+const { paramsCode } = require('./shapes')
+const GL = require('./viewer/lightgl')
 
 const openscadOpenJscadParser = require('@jscad/openscad-openjscad-translator')
 
@@ -30,25 +32,45 @@ function setUpEditor (divname, gProcessor) {
   if (document.getElementById(divname) === null) return
 
   //Setup shape
+  function addNewShape(shape) {
+    var currentCode = gEditor.getValue();
+    if (currentCode.indexOf("main") >= 0) {
+      //add params
+      currentCode = currentCode.replace(paramsCode.base[1], ",\n" + paramsCode.getShapeParams(shape) + paramsCode.base[1])
+        //add shape
+      currentCode = currentCode.replace(baseCode[1], ",\n" + shapes.getShape(shape) + baseCode[1])
+
+    } else {
+      currentCode = paramsCode.base[0] + paramsCode.getShapeParams(shape) + paramsCode.base[1];
+      currentCode = currentCode + baseCode[0] + shapes.getShape(shape) + baseCode[1];
+    }
+    gEditor.setValue(currentCode, -1);
+    runExec(gEditor);
+  }
   for (var shape in shapes) {
     if (document.getElementById(shape)) {
       document.getElementById(shape).addEventListener("click", function(event) {
-        var currentCode = gEditor.getValue();
-        if (currentCode.indexOf("main") >= 0)
-          currentCode = currentCode.replace(baseCode[1], ",\n" + shapes[event.target.id] + baseCode[1])
-        else
-          currentCode = baseCode[0] + shapes[event.target.id] + baseCode[1];
-        gEditor.setValue(currentCode, -1);
-        runExec(gEditor);
+        addNewShape(event.target.id);
       })
 
       //drag
-      document.getElementById(shape).ondragstart = function(event){
+      document.getElementById(shape).ondragstart = function(event) {
         event.dataTransfer.setData("shape", event.target.id);
         event.dataTransfer.setData("code", shapes[event.target.id]);
       }
     }
   }
+  //Drag/drop
+
+  document.getElementById('viewerContext').ondragover = function(evt) {
+    evt.preventDefault();
+  };
+  document.getElementById('viewerContext').ondrop = function(ev) {
+    ev.preventDefault();
+    var shape = ev.dataTransfer.getData("shape");
+    //var code = ev.dataTransfer.getData("code");
+    addNewShape(shape);
+  };
 
 function runExec(editor) {
     var src = editor.getValue()
@@ -60,7 +82,7 @@ function runExec(editor) {
       editor.getSession().setMode('ace/mode/javascript')
     }
     if (gProcessor !== null) {
-      gProcessor.setJsCad(src)
+      gProcessor.setJsCad(src);
     }
   }
 
@@ -179,9 +201,30 @@ function getSourceFromEditor (gEditor) {
   return ''
 }
 
+ function pick(gProcessor, x, y) {
+   var tracer = new GL.Raytracer();
+   var ray = tracer.getRayForPixel(x, y);
+   var intersects = [];
+   for (var i = 0; i < gProcessor.viewer.meshes.length; i++) {
+     var bbox = gProcessor.viewer.meshes[i].getAABB();
+     var result = GL.Raytracer.hitTestBox(
+       tracer.eye, ray, bbox.min, bbox.max);
+     if (result) {
+      result.index = i;
+       intersects.push(result);
+     }
+   }
+   //find closest
+   intersects.sort(function(a,b){
+    return a.t > b.t?1:-1;
+   })
+   return intersects.length?intersects[0].index:-1;
+ }
+
 module.exports = {
   setUpEditor,
   putSourceInEditor,
-  getSourceFromEditor
+  getSourceFromEditor,
+  pick
 }
 

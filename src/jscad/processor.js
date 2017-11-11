@@ -20,7 +20,7 @@ function Processor (containerdiv, options) {
     debug: false,
     libraries: [],
     openJsCadPath: '',
-    useAsync: true,
+    useAsync: false,
     useSync: true,
     viewer: {}
   }
@@ -216,8 +216,21 @@ Processor.prototype = {
       element.innerHTML = 'Update'
       element.id = 'updateButton'
     }
-    element.onclick = function (e) {
-      that.rebuildSolid()
+    element.onclick = function(e) {
+      that.rebuildSolid();
+
+      //update initial value only
+      var params = document.getElementsByClassName("parameterstable")[0];
+      var inputs = params.querySelectorAll("input");
+      //select mesh params by id
+        var currentSrc = that.editor.getValue();
+      inputs.forEach(function(p) {
+        var initial = currentSrc.indexOf("initial", currentSrc.indexOf(p.name));
+        var close = currentSrc.indexOf("}", currentSrc.indexOf(p.name));
+        var old = currentSrc.substring(initial, close);
+        currentSrc = currentSrc.replace(old, "initial: " + p.value);
+      })
+        that.editor.setValue(currentSrc, -1);
     }
     this.parametersdiv.appendChild(element)
 
@@ -288,7 +301,7 @@ Processor.prototype = {
     if (startpoint > endpoint) { startpoint = this.selectEndPoint; endpoint = this.selectStartPoint }
 
     var objs = this.currentObjects.slice(startpoint, endpoint + 1)
-    this.viewedObject = convertToSolid(objs) // enforce CSG to display
+    this.viewedObject = objs;//convertToSolid(objs) // enforce CSG to display
 
     if (this.viewer) {
       this.viewer.setCsg(this.viewedObject)
@@ -345,7 +358,7 @@ Processor.prototype = {
     this.formatDropdown.style.display = ((!this.hasOutputFile) && (this.viewedObject)) ? 'inline' : 'none'
     this.generateOutputFileButton.style.display = ((!this.hasOutputFile) && (this.viewedObject)) ? 'inline' : 'none'
     this.downloadOutputFileLink.style.display = this.hasOutputFile ? 'inline' : 'none'
-    this.parametersdiv.style.display = (this.paramControls.length > 0) ? 'inline-block' : 'none' // was 'block'
+    //this.parametersdiv.style.display = (this.paramControls.length > 0) ? 'inline-block' : 'none' // was 'block'
     this.errordiv.style.display = this.hasError ? 'block' : 'none'
     this.statusdiv.style.display = this.hasError ? 'none' : 'block'
     this.selectdiv.style.display = (this.currentObjects.length > 1) ? 'none' : 'none' // FIXME once there's a data model
@@ -685,7 +698,10 @@ Processor.prototype = {
     control.paramType = definition.type
     // determine initial value of control
     if (prevValue !== undefined) {
-      control.value = prevValue
+      if(prevValue instanceof Array)
+        control.value = JSON.stringify(prevValue);
+      else
+        control.value = prevValue
     } else if ('initial' in definition) {
       control.value = definition.initial
     } else if ('default' in definition) {
@@ -748,7 +764,14 @@ Processor.prototype = {
             l.innerHTML = e.currentTarget.value
           }
           if (document.getElementById('instantUpdate').checked === true) {
-            that.rebuildSolid()
+            that.rebuildSolid();
+            //update initial value only
+            var currentSrc = that.editor.getValue();
+            var initial = currentSrc.indexOf("initial",currentSrc.indexOf(e.currentTarget.name));
+            var close = currentSrc.indexOf("}",currentSrc.indexOf(e.currentTarget.name));
+            currentSrc.replace(currentSrc.substring(initial,close-initial),"initial: "+e.currentTarget.value+"}");
+            that.editor.setValue(currentSrc,-1);
+            
           }
         }
         this.paramControls.push(control)

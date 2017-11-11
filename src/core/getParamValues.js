@@ -40,6 +40,10 @@ module.exports = function getParamValues (paramControls, onlyChanged) {
         break
       default:
         value = control.value
+        if(value.indexOf("[") === 0 && value.lastIndexOf("]") === value.length-1){
+          //json array
+          value = JSON.parse(value);
+        }
         break
     }
     if (onlyChanged) {
