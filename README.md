@@ -1,6 +1,11 @@
 # OpenJSCAD.org
 <img src="doc/logo.png" width=256 align=right>
 
+
+# Experimental branch
+You can generate new shapes and code via a shape GUI
+
+
 >*OpenJsCad.org* is a more up-to-date [OpenJsCAD](http://joostn.github.com/OpenJsCad/) frontend where you can edit .jscad files either locally or online via JS editor (built-in).
 A few functions are available to make the transition from [OpenSCAD](http://openscad.org/) to OpenJSCAD easier ([scad-api](https://github.com/jscad/scad-api) built-in),
 as well CLI (command-line interface) for server-side computations with NodeJS.
